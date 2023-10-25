@@ -10,7 +10,7 @@ export class Database {
       .then(data => {
         this.#database = JSON.parse(data)
       })
-      .cath(() => {
+      .catch(() => {
         this.#persist()
       })
   }
@@ -25,7 +25,9 @@ export class Database {
     if (search) {
       data = data.filter(row => {
         return Object.entries(search).some(([key, value]) => {
-          return row[key].toLowerCase().includes(value.toLowerCase())
+          if (!value) return true
+
+          return row[key].includes(value)
         })
       })
     }
@@ -49,7 +51,8 @@ export class Database {
     const rowIndex = this.#database[table].findIndex(row => row.id === id)
 
     if (rowIndex > -1) {
-      this.#database[table][rowIndex] = { id, ...data }
+      const row = this.#database[table][rowIndex]
+      this.#database[table][rowIndex] = { id, ...row, ...data }
       this.#persist()
     }
   }
